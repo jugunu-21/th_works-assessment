@@ -3,8 +3,8 @@
 ## Backend Design
 
 - FastAPI chosen for speed, type hints, and automatic docs.
-- Layers: `schemas.py` (Pydantic), `models.py` (SQLAlchemy), `crud.py` (DB ops), `embeddings.py` (vector + cosine), `main.py` (routes), `database.py` (engine/session).
-- Tables created via SQLAlchemy metadata (`Base.metadata.create_all`).
+- Layers: `schemas.py`, `models.py`, `crud.py`, `embeddings.py`, `main.py`, `database.py`.
+- Tables created via SQLAlchemy metadata.
 
 ## Database Schema
 
@@ -13,21 +13,18 @@
   - `title TEXT NOT NULL`
   - `content TEXT NOT NULL`
   - `embedding JSON` (array[float])
-- Embedding indexed in-memory at query time (for simplicity). For scale, consider pgvector.
 
 ## AI Search
 
-- Embedding is generated locally using a deterministic hashing-based vector (no external dependencies), stored with each note.
-- Search: embed query, compute cosine similarity vs stored embeddings, sort desc, return top results.
-- Trade-off: not SOTA semantically; avoids heavyweight installs and works offline. Swappable for `sentence-transformers` later.
+- Default: hashing-based embedding — deterministic numeric vector from note text (title + content). Pros: no heavy deps, works offline; Cons: not SOTA semantics.
+- Optional: set `EMBEDDINGS_BACKEND=sbert` and install `sentence-transformers`. Model name via `EMBEDDING_MODEL_NAME` (default `sentence-transformers/all-MiniLM-L6-v2`). If import/model load fails, the code automatically falls back to hashing.
+- Storage: embedding stored per note in JSON column as float array. Query embeds the input and computes cosine similarity against stored vectors, sorts desc, returns top results.
 
 ## Frontend
 
-- React + Vite TS. Context for state. API layer calls backend.
-- Components: Note form, search bar, notes list.
+- React + Vite TS. Context state. Calls backend API for create/list/search/delete.
 
 ## Trade-offs
 
-- Simpler embedding for portability and easy setup on Python 3.12+/macOS without torch.
-- No migrations tool included; SQLAlchemy metadata creates tables. Could add Alembic if needed.
-- Basic CORS config for local dev.
+- Portability prioritized over model accuracy by default; an optional SBERT path is provided for stronger semantics when environment supports torch.
+- No Alembic; metadata create_all for simplicity.

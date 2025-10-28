@@ -3,24 +3,30 @@
 ### Stack
 
 - FastAPI, SQLAlchemy 2.0, PostgreSQL
-- Lightweight hashing-based embeddings (no PyTorch required)
+- Embeddings: hashing-based by default (no torch). Optional `sentence-transformers` if you enable it.
 
 ### Environment
 
-Create `.env` in `backend/` (optional; you can export vars instead):
+Create `.env` in `backend/` (optional):
 
 ```
 DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/notes_db
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+# Optional: switch embedding backend to sentence-transformers
+# EMBEDDINGS_BACKEND=sbert
+# EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 ```
 
 ### Install
 
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+
+# Optional: enable sentence-transformers (requires torch wheels compatible with your Python)
+# pip install sentence-transformers
 ```
 
 ### Run
@@ -39,4 +45,4 @@ uvicorn app.main:app --reload
 
 `notes(id PK, title TEXT NOT NULL, content TEXT NOT NULL, embedding JSON)`
 
-Embeddings are generated deterministically using a hashing-based vectorization and stored as an array of floats (JSON). Search computes cosine similarity between the query embedding and stored embeddings, sorts, and returns top results.
+Embeddings are generated either via a deterministic hashing-based vector (default) or `sentence-transformers` if enabled. Stored as an array of floats (JSON). Search computes cosine similarity and sorts results.

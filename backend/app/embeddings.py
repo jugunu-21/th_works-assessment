@@ -7,10 +7,28 @@ import numpy as np
 from .config import settings
 
 
+# Optional import for sentence-transformers; we fall back if not present
+_SBERT_AVAILABLE = False
+try:
+    if settings.embeddings_backend == "sbert":
+        from sentence_transformers import SentenceTransformer  # type: ignore
+        _SBERT_AVAILABLE = True
+except Exception:
+    _SBERT_AVAILABLE = False
+
+
 # Simple hashing-based embedding without external ML deps
 # Deterministic vector from text using multiple hash seeds
 _HASH_SEEDS = [b"s1", b"s2", b"s3", b"s4", b"s5", b"s6", b"s7", b"s8"]
 _VECTOR_SIZE = 128
+
+_sbert_model = None
+if _SBERT_AVAILABLE:
+    try:
+        _sbert_model = SentenceTransformer(settings.embedding_model_name or "sentence-transformers/all-MiniLM-L6-v2")
+    except Exception:
+        _SBERT_AVAILABLE = False
+        _sbert_model = None
 
 
 def _hash_to_vector(text: str) -> np.ndarray:
@@ -28,6 +46,9 @@ def _hash_to_vector(text: str) -> np.ndarray:
 
 
 def embed_texts(texts: List[str]) -> List[List[float]]:
+    if _SBERT_AVAILABLE and _sbert_model is not None:
+        embs = _sbert_model.encode(texts, normalize_embeddings=True)
+        return embs.tolist()
     return [_hash_to_vector(t).tolist() for t in texts]
 
 
