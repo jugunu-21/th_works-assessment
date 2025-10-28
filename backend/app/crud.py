@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from .models import Note
 from .embeddings import embed_text, cosine_similarity
+from .config import settings
 
 
 def create_note(db: Session, title: str, content: str) -> Note:
@@ -29,16 +30,37 @@ def delete_note(db: Session, note_id: int) -> None:
     db.commit()
 
 
+def backfill_missing_embeddings(db: Session) -> int:
+    """Populate embeddings for notes that are missing them. Returns count updated."""
+    notes = list(db.scalars(select(Note)).all())
+    updated = 0
+    for n in notes:
+        if n.embedding is None:
+            n.embedding = embed_text(f"{n.title}\n{n.content}")
+            updated += 1
+    if updated:
+        db.commit()
+    return updated
+
+
 def search_notes(db: Session, query: str, top_k: int = 10) -> List[Tuple[Note, float]]:
     query_embedding = embed_text(query)
     notes = list(db.scalars(select(Note)).all())
 
-    scored: List[Tuple[Note, float]] = []
+    scored_all: List[Tuple[Note, float]] = []
     for note in notes:
         if note.embedding is None:
             continue
         sim = cosine_similarity(query_embedding, note.embedding)
-        scored.append((note, sim))
+        scored_all.append((note, sim))
 
-    scored.sort(key=lambda x: x[1], reverse=True)
-    return scored[:top_k]
+    # Sort all by similarity desc
+    scored_all.sort(key=lambda x: x[1], reverse=True)
+
+    # First pass: apply threshold filter
+    filtered = [(n, s) for (n, s) in scored_all if s >= settings.min_similarity]
+    if filtered:
+        return filtered[:top_k]
+
+    # Fallback: if nothing meets threshold, return top_k regardless
+    return scored_all[:top_k]

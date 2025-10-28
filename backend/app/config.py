@@ -28,5 +28,8 @@ class Settings(BaseModel):
         "EMBEDDING_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2"
     )
 
+    # Search filtering threshold (0.0 - 1.0)
+    min_similarity: float = float(os.getenv("MIN_SIMILARITY", "0.5"))
+
 
 settings = Settings()
