@@ -43,7 +43,7 @@ def backfill_missing_embeddings(db: Session) -> int:
     return updated
 
 
-def search_notes(db: Session, query: str, top_k: int = 10) -> List[Tuple[Note, float]]:
+def search_notes(db: Session, query: str, top_k: int | None = None) -> List[Tuple[Note, float]]:
     query_embedding = embed_text(query)
     notes = list(db.scalars(select(Note)).all())
 
@@ -52,15 +52,22 @@ def search_notes(db: Session, query: str, top_k: int = 10) -> List[Tuple[Note, f
         if note.embedding is None:
             continue
         sim = cosine_similarity(query_embedding, note.embedding)
+        # clamp similarity to [0, 1]
+        sim = max(0.0, min(1.0, sim))
         scored_all.append((note, sim))
 
-    # Sort all by similarity desc
+    # Sort by similarity desc
     scored_all.sort(key=lambda x: x[1], reverse=True)
 
-    # First pass: apply threshold filter
+    # Apply threshold
     filtered = [(n, s) for (n, s) in scored_all if s >= settings.min_similarity]
-    if filtered:
-        return filtered[:top_k]
 
-    # Fallback: if nothing meets threshold, return top_k regardless
-    return scored_all[:top_k]
+    # Size caps
+    normal_k = top_k if top_k is not None else settings.search_top_k
+    fallback_k = settings.fallback_top_k
+
+    if len(filtered) >= settings.min_results:
+        return filtered[:normal_k]
+
+    # Fallback: return small number of best matches (not everything)
+    return scored_all[:fallback_k]

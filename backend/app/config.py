@@ -31,5 +31,10 @@ class Settings(BaseModel):
     # Search filtering threshold (0.0 - 1.0)
     min_similarity: float = float(os.getenv("MIN_SIMILARITY", "0.5"))
 
+    # Search result sizing
+    search_top_k: int = int(os.getenv("SEARCH_TOP_K", "10"))
+    fallback_top_k: int = int(os.getenv("FALLBACK_TOP_K", "3"))
+    min_results: int = int(os.getenv("MIN_RESULTS", "1"))
+
 
 settings = Settings()
