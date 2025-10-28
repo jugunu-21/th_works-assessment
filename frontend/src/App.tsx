@@ -1,34 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import NoteForm from './components/NoteForm'
+import SearchBar from './components/SearchBar'
+import NotesList from './components/NotesList'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="app">
+      <header className="app-header">
+        <h1>📝 AI-Powered Notes Manager</h1>
+        <p className="subtitle">Create, search, and manage your notes with semantic AI search</p>
+      </header>
+      
+      <main className="app-main">
+        <div className="container">
+          <div className="top-section">
+            <NoteForm />
+            <SearchBar />
+          </div>
+          
+          <div className="notes-section">
+            <NotesList />
+          </div>
+        </div>
+      </main>
+      
+      <footer className="app-footer">
+        <p>Built with React + TypeScript + useContext 🚀</p>
+      </footer>
+    </div>
   )
 }
 
