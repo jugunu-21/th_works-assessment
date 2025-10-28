@@ -1,9 +1,12 @@
-import { useNotes } from '../context/NotesContext';
+import { useNotes } from "../context/NotesContext";
 
 const NotesList = () => {
-  const { notes, searchResults, loading, error, isSearching, deleteNote } = useNotes();
+  const { notes, searchResults, loading, error, isSearching, deleteNote } =
+    useNotes();
 
-  const displayNotes = isSearching ? searchResults : notes.map(note => ({ note, similarity: undefined }));
+  const displayNotes = isSearching
+    ? searchResults
+    : notes.map((note) => ({ note, similarity: undefined }));
 
   if (loading && displayNotes.length === 0) {
     return <div className="loading">Loading notes...</div>;
@@ -16,14 +19,20 @@ const NotesList = () => {
   if (displayNotes.length === 0) {
     return (
       <div className="empty-state">
-        {isSearching ? '🔍 No notes found matching your search' : '📝 No notes yet. Create your first note!'}
+        {isSearching
+          ? "🔍 No notes found matching your search"
+          : "📝 No notes yet. Create your first note!"}
       </div>
     );
   }
 
   return (
     <div className="notes-list-container">
-      <h2>{isSearching ? `Search Results (${displayNotes.length})` : `All Notes (${notes.length})`}</h2>
+      <h2>
+        {isSearching
+          ? `Search Results (${displayNotes.length})`
+          : `All Notes (${notes.length})`}
+      </h2>
       <div className="notes-list">
         {displayNotes.map(({ note, similarity }) => (
           <div key={note.id} className="note-card">
@@ -44,11 +53,11 @@ const NotesList = () => {
                   {new Date(note.created_at).toLocaleDateString()}
                 </span>
               )}
-              {similarity !== undefined && (
+              {/* {similarity !== undefined && (
                 <span className="similarity-score">
                   Match: {(similarity * 100).toFixed(0)}%
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         ))}
