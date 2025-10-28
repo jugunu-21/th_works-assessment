@@ -1,0 +1,40 @@
+# Root gitignore for the repo
+
+# Backend virtual envs and env files
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+backend/.env.*
+
+# Python caches in backend
+backend/**/__pycache__/
+backend/**/*.py[cod]
+backend/**/*$py.class
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.pytype/
+backend/.cache/
+backend/htmlcov/
+backend/.coverage*
+backend/coverage.xml
+
+# Logs and local DB files in backend
+backend/logs/
+backend/*.log
+backend/*.sqlite
+backend/*.sqlite3
+backend/*.db
+
+# Build/dist in backend (if any)
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/.eggs/
+backend/*.egg
+
+# Editors/OS
+backend/.vscode/
+backend/.idea/
+.DS_Store
